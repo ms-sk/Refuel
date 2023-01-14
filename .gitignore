@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Settings and cache files
+settings.json
+stations.json
+
+
 # User-specific files
 *.rsuser
 *.suo
