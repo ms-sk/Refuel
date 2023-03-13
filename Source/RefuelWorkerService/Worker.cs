@@ -9,7 +9,7 @@ namespace RefuelWorkerService
 		readonly ILogger<Worker> _logger;
 		readonly StandardKernel _kernel = new(new RefuelModule());
 		readonly RefuelUpdater _updater;
-		readonly TimeSpan _updateInterval = new(0, 43, 50);
+		readonly TimeSpan _updateInterval = new(0, 0, 10);
 
 		public Worker(ILogger<Worker> logger)
 		{
@@ -22,7 +22,7 @@ namespace RefuelWorkerService
 			var settingsCache = _kernel.Get<SettingsCache>();
 			await settingsCache.Update();
 
-			var stationCache = _kernel.Get<StationCache>();
+			var stationCache = _kernel.Get<Services.StationCache>();
 			await stationCache.Update();
 
 			while (!stoppingToken.IsCancellationRequested)

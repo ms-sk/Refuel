@@ -4,15 +4,17 @@ namespace RefuelWorkerService
 {
 	public sealed class RefuelUpdater
 	{
-		readonly TankerKoenigService tankerKoenigService;
+		readonly ITankerKoenigService tankerKoenigService;
 		readonly SettingsCache cache;
 		readonly NotificationService notificationService;
+		private readonly Services.StationCache stationCache;
 
-		public RefuelUpdater(TankerKoenigService tankerKoenigService, SettingsCache cache, NotificationService notificationService)
+		public RefuelUpdater(ITankerKoenigService tankerKoenigService, SettingsCache cache, NotificationService notificationService, Services.StationCache stationCache)
 		{
 			this.tankerKoenigService = tankerKoenigService ?? throw new ArgumentNullException(nameof(tankerKoenigService));
 			this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
 			this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+			this.stationCache = stationCache ?? throw new ArgumentNullException(nameof(stationCache));
 		}
 
 		internal async Task Execute()
@@ -29,6 +31,7 @@ namespace RefuelWorkerService
 
 			if (prices != null && prices.Ok)
 			{
+				await stationCache.Update(prices);
 				await notificationService.Notify(prices);
 			}
 		}

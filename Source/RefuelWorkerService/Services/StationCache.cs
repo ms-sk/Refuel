@@ -15,12 +15,19 @@ namespace RefuelWorkerService.Services
 
 		public async Task Update()
 		{
-			var cacheFile = await File.ReadAllTextAsync(Paths.StationCache);
-
-			var result = jsonSerializer.Deserialize<Dictionary<string, StationDetails>>(cacheFile);
-			if (result != null)
+			try
 			{
-				_stations = result;
+				var cacheFile = await File.ReadAllTextAsync(Paths.StationCache);
+
+				var result = jsonSerializer.Deserialize<Dictionary<string, StationDetails>>(cacheFile);
+				if (result != null)
+				{
+					_stations = result;
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
 			}
 		}
 
@@ -43,7 +50,23 @@ namespace RefuelWorkerService.Services
 
 		public async Task Save()
 		{
-			await jsonSerializer.Serialize(_stations);
+			await jsonSerializer.SaveToFile(_stations, Paths.StationCache);
+		}
+
+		internal async Task Update(PriceResult prices)
+		{
+			foreach (var price in prices.Prices)
+			{
+				var station = Get(price.Key);
+				if (station != null)
+				{
+					station.Station.Diesel = price.Value.Diesel;
+					station.Station.E5 = price.Value.E5;
+					station.Station.E10 = price.Value.E10;
+				}
+			}
+
+			await Save();
 		}
 	}
 }

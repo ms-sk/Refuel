@@ -5,15 +5,15 @@ namespace RefuelWorkerService.Services
 	public sealed class NotificationService
 	{
 		readonly SettingsCache cache;
-		readonly TankerKoenigService tankerKoenigService;
-		readonly EmailFactory factory;
+		readonly ITankerKoenigService tankerKoenigService;
+		readonly PushOverService pushOverService;
 		readonly StationCache stationCache;
 
-		public NotificationService(SettingsCache settingsCache, TankerKoenigService tankerKoenigService, EmailFactory factory, StationCache cache)
+		public NotificationService(SettingsCache settingsCache, ITankerKoenigService tankerKoenigService, PushOverService pushOverService, StationCache cache)
 		{
 			this.cache = settingsCache ?? throw new ArgumentNullException(nameof(settingsCache));
 			this.tankerKoenigService = tankerKoenigService ?? throw new ArgumentNullException(nameof(tankerKoenigService));
-			this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+			this.pushOverService = pushOverService ?? throw new ArgumentNullException(nameof(pushOverService));
 			stationCache = cache;
 		}
 
@@ -57,19 +57,14 @@ namespace RefuelWorkerService.Services
 			List<StationDetails> details = new();
 			foreach (var item in station.AcctepableStations)
 			{
-				details.Add(await GetStationDetails(item));
+				var result = await GetStationDetails(item);
+				if (result != null)
+				{
+					details.Add(result);
+				}
 			}
 
-			var email = factory.Create(details, station.Mail);
-
-			factory.Send(new SendParameter
-			{
-				Mail = cache.Settings.WorkerMail,
-				Password = cache.Settings.WorkerMailPassword,
-				TargetMail = station.Mail,
-				Content = email
-			});
-
+			await pushOverService.Notify(station, details);
 			await stationCache.Save();
 		}
 
@@ -80,6 +75,12 @@ namespace RefuelWorkerService.Services
 			if (details == null)
 			{
 				details = await tankerKoenigService.GetStationDetails(guid);
+
+				if (details == null)
+				{
+					return null;
+				}
+
 				stationCache.Add(details);
 			}
 

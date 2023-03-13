@@ -8,12 +8,13 @@ namespace RefuelWorkerService.DI
 	{
 		public override void Load()
 		{
-			Bind<EmailFactory>().ToSelf().InSingletonScope();
+			Bind<StationCache>().ToSelf().InSingletonScope();
+			Bind<PushOverService>().ToSelf().InSingletonScope();
 			Bind<RefuelHttpClient>().ToSelf().InSingletonScope();
 			Bind<RefuelJsonSerializer>().ToSelf().InSingletonScope();
 			Bind<SettingsCache>().ToSelf().InSingletonScope();
 			Bind<SettingsLoader>().ToSelf().InSingletonScope();
-			Bind<TankerKoenigService>().ToSelf().InSingletonScope();
+			Bind<ITankerKoenigService>().To<TankerTestKoenigService>().InSingletonScope();
 		}
 	}
 }

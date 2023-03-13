@@ -5,7 +5,7 @@ using System.Web;
 
 namespace RefuelWorkerService.Services
 {
-	public sealed class TankerKoenigService
+	public sealed class TankerKoenigService : ITankerKoenigService
 	{
 		readonly RefuelHttpClient httpClient;
 		private readonly RefuelJsonSerializer serializer;

@@ -15,11 +15,10 @@ namespace RefuelWorkerService.Services
 			return JsonSerializer.Deserialize<T>(json, options);
 		}
 
-		public async Task Serialize<T>(T obj)
+		public async Task SaveToFile<T>(T obj, string path)
 		{
-			var json = JsonSerializer.Serialize(obj);
-			// TODO : entkoppeln
-			await File.WriteAllTextAsync(Paths.StationCache, json);
+			var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+			await File.WriteAllTextAsync(path, json);
 		}
 	}
 }
